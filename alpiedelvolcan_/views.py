@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from Tours.models import Tour
 from Configuraciones.models import Barra_Principal, CarruselInicio, Services_Bar, Team_bar, Contacts, Urls_info, Urls_interes, General_Description
+from Transacciones.models import EnlacePago
 
 #vista para mostrar la pagina principal
 def index(request):
@@ -66,5 +67,4 @@ def footer(request):
     
     
     return render(request, 'sections/footer.html', context)
-
 

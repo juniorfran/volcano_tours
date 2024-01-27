@@ -8,6 +8,7 @@ from io import BytesIO
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+# from Transacciones.models import EnlacePago
 
 # Create your models here.
 
@@ -89,7 +90,7 @@ class Reserva(models.Model):
      # Nuevos campos para el total a pagar y el iva
     precio_adulto = models.DecimalField(max_digits=10, decimal_places=2)
     precio_nino = models.DecimalField(max_digits=10, decimal_places=2)
-    iva = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.13'))
+    iva = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
     total_pagar = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     
 
@@ -98,13 +99,16 @@ class Reserva(models.Model):
 
     def save(self, *args, **kwargs):
         # Calcular el total a pagar antes de guardar la reserva
-        self.total_pagar = (self.cantidad_adultos * self.precio_adulto)
-        self.total_pagar *= 1 + self.iva  # Agregar el IVA
+        total_sin_iva = self.cantidad_adultos * self.precio_adulto
+        iva_calculado = total_sin_iva * Decimal('0.13')  # Calcular el valor del IVA
+        self.iva = iva_calculado
+        self.total_pagar = total_sin_iva + iva_calculado  # Sumar el IVA al total a pagar
         
         # Generar código de reserva único antes de guardar
         if not self.codigo_reserva:
             self.codigo_reserva = self.generar_codigo_reserva()
             self.enviar_codigo_por_correo()  # Envía el código por correo al crear la reserva
+        
         super().save(*args, **kwargs)
 
     def generar_codigo_reserva(self):
@@ -115,7 +119,7 @@ class Reserva(models.Model):
         fecha_actual = datetime.now().strftime("%Y%m%d")
 
         # Genera un número correlativo desde 001
-        correlativo = str(random.randint(1, 999)).zfill(3)
+        correlativo = str(random.randint(1, 9999)).zfill(4)
 
         # Si fecha_reserva es una cadena, conviértela a un objeto datetime
         if isinstance(self.fecha_reserva, str):
@@ -138,6 +142,9 @@ class Reserva(models.Model):
         return self.qr_code.url
 
     def enviar_codigo_por_correo(self):
+        
+        # Crea el mensaje del correo electrónic
+        
         # Genera el código QR
         qr = qrcode.QRCode(
             version=1,
@@ -161,7 +168,7 @@ class Reserva(models.Model):
         subject = 'Código de Reserva para el Tour'
         from_email = settings.DEFAULT_FROM_EMAIL  # Cambia esto al remitente real
         to_email = [self.correo_electronico]
-
+                
         # Renderiza el contenido del correo utilizando un template
         context = {
             'tour_titulo': self.tour.titulo,
@@ -176,8 +183,7 @@ class Reserva(models.Model):
             'cantidad_adultos': self.cantidad_adultos,
             'cantidad_ninos': self.cantidad_ninos,
             'fecha_reserva': self.fecha_reserva,
-            'total_pagar': self.total_pagar,
-            # Agrega más detalles según sea necesario
+            'total_pagar': self.total_pagar
         }
         html_content = render_to_string('email/correo_reserva.html', context)
         text_content = strip_tags(html_content)

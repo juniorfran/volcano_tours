@@ -21,6 +21,7 @@ def make_wompi_post_request(endpoint, access_token, data):
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error during POST request: {e}")
+        print(f"Response content: {e.response.content}")
         return None
     
 
@@ -40,17 +41,20 @@ def create_payment_link(reserva_id, client_id, client_secret, comercio_id, monto
             "identificadorEnlaceComercio": comercio_id,
             "monto": monto,
             "nombreProducto": nombre_producto,
-            "descripcionProducto":descripcion_Producto,
-            "urlImagenProducto": imagenProducto,
-            "cantidadPorDefecto": cantidad,
-            # "metadata": {
-            #     "identificadorEnlaceComercio": comercio_id,
-            #     "descripcionProducto": descripcionProducto,
-            #     "urlImagenProducto": imagenProducto,
-            #     "cantidadPorDefecto": cantidad
-            #     # Otros datos específicos de la pantalla de pago
-            # },
-                    
+            # "descripcionProducto":descripcion_Producto,
+            # "urlImagenProducto": imagenProducto,
+            # "cantidadPorDefecto": cantidad,
+            "infoProducto": {
+                    "descripcionProducto": descripcion_Producto,
+                    "urlImagenProducto": imagenProducto
+                },
+            "configuracion": {
+                "urlRedirect": "https://volcanosm.net",  # URL a la que se redirige después de realizar el pago
+                "esMontoEditable": False,
+                "esCantidadEditable": False,
+                "cantidadPorDefecto": cantidad,
+                "emailsNotificacion": "correo@ejemplo.com",
+            },    
             **kwargs
         }
 
@@ -63,7 +67,7 @@ def create_payment_link(reserva_id, client_id, client_secret, comercio_id, monto
         enlace_pago = EnlacePago.objects.create(
             reserva=reserva_instance,
             comercio_id=comercio_id,
-            monto=monto,
+            monto=monto*cantidad,
             nombre_producto=nombre_producto,
             url_qr_code=payment_link_data["urlQrCodeEnlace"],
             url_enlace=payment_link_data["urlEnlace"],
@@ -71,12 +75,13 @@ def create_payment_link(reserva_id, client_id, client_secret, comercio_id, monto
             descripcionProducto=descripcion_Producto,
             imagenProducto=imagenProducto,
             cantidad=cantidad,
-            idEnlace = ["idEnlace"]
+            idEnlace = payment_link_data["idEnlace"]
         )
 
         return enlace_pago
     except requests.exceptions.RequestException as e:
         print(f"Error creating payment link: {e}")
+        print(f"Response content: {e.response.content}")
         return None
 
 

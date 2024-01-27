@@ -59,20 +59,20 @@ consultar_enlace_pago(enlace_pago_id, Client_id, Client_secret)
 
 
 
-def crear_enlace_pago(request):
-    # Obtén los parámetros necesarios, por ejemplo, desde el formulario
-    client_id = Client_id
-    client_secret = Client_secret
-    comercio_id = "12568"
-    monto = 100.0  # Ajusta el monto según tus necesidades
-    nombre_producto = "Tour al volcan de san miguel"
+# def crear_enlace_pago(request):
+#     # Obtén los parámetros necesarios, por ejemplo, desde el formulario
+#     client_id = Client_id
+#     client_secret = Client_secret
+#     comercio_id = "12568"
+#     monto = 100.0  # Ajusta el monto según tus necesidades
+#     nombre_producto = "Tour al volcan de san miguel"
 
-    # Llama a la función para crear el enlace de pago
-    enlace_pago = create_payment_link(client_id, client_secret, comercio_id, monto, nombre_producto)
+#     # Llama a la función para crear el enlace de pago
+#     enlace_pago = create_payment_link(client_id, client_secret, comercio_id, monto, nombre_producto)
 
-    # Realiza las acciones adicionales que necesites con el enlace de pago creado
+#     # Realiza las acciones adicionales que necesites con el enlace de pago creado
 
-    return render(request, "detalle_enlace_pago.html", {"enlace_pago": enlace_pago})
+#     return render(request, "detalle_enlace_pago.html", {"enlace_pago": enlace_pago})
 
 
 

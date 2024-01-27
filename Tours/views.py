@@ -135,7 +135,16 @@ def reservar_tour(request, tour_id):
         reserva.save()
         
         # Obtén la instancia de Reserva después de guardarla en la base de datos
-        reserva_instance = Reserva.objects.get(pk=reserva.id)  
+        reserva_instance = Reserva.objects.get(pk=reserva.id)
+        
+        # #obtener la imagen de tour
+        # imagen_tour = tour.imagen
+        
+        # #construir la url de la imagen del tour
+        # url_imagen_tour = imagen_tour.url
+        # #verificar que la url tenga el formato correcto
+        # if url_imagen_tour and not url_imagen_tour.startswith(("http://", "https://")):
+        url_imagen_tour = "https://codigogenesis.com/genesis/2022/04/imagen-placeholder-por-defecto-WooCommerce.png"
 
         # Asigna el valor de reserva_id después de obtener la instancia
         reserva_id = reserva_instance.id
@@ -143,10 +152,10 @@ def reservar_tour(request, tour_id):
         client_id = Client_id
         client_secret = Client_secret
         comercio_id = reserva.codigo_reserva
-        monto = float(reserva.total_pagar)
+        monto = float(reserva.precio_adulto)
         nombre_producto = tour.titulo
         descripcion_Producto = tour.descripcion
-        imagenProducto = tour.imagen.url
+        imagenProducto = str(url_imagen_tour)
         cantidad = reserva.cantidad_adultos
 
         # Llama a la función para crear el enlace de pago
